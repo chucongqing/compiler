@@ -89,6 +89,82 @@ func (self *reader) checkHeader() {
 	}
 }
 
+func (self *reader) readConstants() []interface{} {
+	constants := make([]interface{}, self.readUint32())
+	for i := range constants {
+		constants[i] = self.readConstant()
+	}
+	return constants
+}
+
+func (self *reader) readConstant() interface{} {
+	switch self.readByte() {
+	case TAG_NIL:
+		return nil
+	case TAG_BOOLEAN:
+		return self.readByte() != 0
+	case TAG_INTEGER:
+		return self.readLuaInteger()
+	case TAG_NUMBER:
+		return self.readLuaNumber()
+	case TAG_SHORT_STR:
+		return self.readString()
+	case TAG_LONG_STR:
+		return self.readString()
+	default:
+		panic("corrupted!")
+	}
+}
+
+func (self *reader) readUpvalues() []Upvalue {
+	upvalues := make([]Upvalue, self.readUint32())
+	for i := range upvalues {
+		upvalues[i] = Upvalue{
+			Instack: self.readByte(),
+			Idx:     self.readByte(),
+		}
+	}
+
+	return upvalues
+}
+
+func (self *reader) readProtos(parentSource string) []*Prototype {
+	protos := make([]*Prototype, self.readUint32())
+	for i := range protos {
+		protos[i] = self.readProto(parentSource)
+	}
+	return protos
+}
+
+func (self *reader) readLineInfo() []uint32 {
+	lineInfo := make([]uint32, self.readUint32())
+	for i := range lineInfo {
+		lineInfo[i] = self.readUint32()
+	}
+	return lineInfo
+}
+
+func (self *reader) readLocVars() []LocVar {
+	locVars := make([]LocVar, self.readUint32())
+
+	for i := range locVars {
+		locVars[i] = LocVar{
+			VarName: self.readString(),
+			StartPC: self.readUint32(),
+			EndPC:   self.readUint32(),
+		}
+	}
+
+	return locVars
+}
+func (self *reader) readUpvalueNames() []string {
+	names := make([]string, self.readUint32())
+	for i := range names {
+		names[i] = self.readString()
+	}
+	return names
+}
+
 func (self *reader) readProto(parentSource string) *Prototype {
 	source := self.readString()
 	if source == "" {
@@ -102,5 +178,11 @@ func (self *reader) readProto(parentSource string) *Prototype {
 		IsVararg:        self.readByte(),
 		MaxStackSize:    self.readByte(),
 		Code:            self.readCode(),
+		Constants:       self.readConstants(),
+		Upvalues:        self.readUpvalues(),
+		Protos:          self.readProtos(source),
+		LineInfo:        self.readLineInfo(),
+		LocVars:         self.readLocVars(),
+		UpvalueNames:    self.readUpvalueNames(),
 	}
 }
