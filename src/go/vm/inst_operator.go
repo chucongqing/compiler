@@ -100,6 +100,10 @@ func length(i Instruction, vm LuaVM) {
 	vm.Replace(a)
 }
 
+func _len(i Instruction, vm LuaVM) {
+	length(i, vm)
+}
+
 // R(A) := R(B).. ... ..R(C)
 func concat(i Instruction, vm LuaVM) {
 	a, b, c := i.ABC()
