@@ -94,11 +94,11 @@ var opcodes = []opcode{
 	opcode{0, 1, OpArgU, OpArgN, IABC /* */, "LOADNIL ", loadNil},       // R(A), R(A+1), ..., R(A+B) := nil
 	opcode{0, 1, OpArgU, OpArgN, IABC /* */, "GETUPVAL", unimpliedfunc}, // R(A) := UpValue[B]
 	opcode{0, 1, OpArgU, OpArgK, IABC /* */, "GETTABUP", unimpliedfunc}, // R(A) := UpValue[B][RK(C)]
-	opcode{0, 1, OpArgR, OpArgK, IABC /* */, "GETTABLE", unimpliedfunc}, // R(A) := R(B)[RK(C)]
-	opcode{0, 0, OpArgK, OpArgK, IABC /* */, "SETTABUP", unimpliedfunc}, // UpValue[A][RK(B)] := RK(C)
+	opcode{0, 1, OpArgR, OpArgK, IABC /* */, "GETTABLE", getTable},      // R(A) := R(B)[RK(C)]
+	opcode{0, 0, OpArgK, OpArgK, IABC /* */, "SETTABUP", setTable},      // UpValue[A][RK(B)] := RK(C)
 	opcode{0, 0, OpArgU, OpArgN, IABC /* */, "SETUPVAL", unimpliedfunc}, // UpValue[B] := R(A)
 	opcode{0, 0, OpArgK, OpArgK, IABC /* */, "SETTABLE", unimpliedfunc}, // R(A)[RK(B)] := RK(C)
-	opcode{0, 1, OpArgU, OpArgU, IABC /* */, "NEWTABLE", unimpliedfunc}, // R(A) := {} (size = B,C)
+	opcode{0, 1, OpArgU, OpArgU, IABC /* */, "NEWTABLE", newTable},      // R(A) := {} (size = B,C)
 	opcode{0, 1, OpArgR, OpArgK, IABC /* */, "SELF    ", unimpliedfunc}, // R(A+1) := R(B); R(A) := R(B)[RK(C)]
 	opcode{0, 1, OpArgK, OpArgK, IABC /* */, "ADD     ", add},           // R(A) := RK(B) + RK(C)
 	opcode{0, 1, OpArgK, OpArgK, IABC /* */, "SUB     ", sub},           // R(A) := RK(B) - RK(C)
@@ -130,7 +130,7 @@ var opcodes = []opcode{
 	opcode{0, 1, OpArgR, OpArgN, IAsBx /**/, "FORPREP ", forPrep},       // R(A)-=R(A+2); pc+=sBx
 	opcode{0, 0, OpArgN, OpArgU, IABC /* */, "TFORCALL", unimpliedfunc}, // R(A+3), ... ,R(A+2+C) := R(A)(R(A+1), R(A+2));
 	opcode{0, 1, OpArgR, OpArgN, IAsBx /**/, "TFORLOOP", unimpliedfunc}, // if R(A+1) ~= nil then { R(A)=R(A+1); pc += sBx }
-	opcode{0, 0, OpArgU, OpArgU, IABC /* */, "SETLIST ", unimpliedfunc}, // R(A)[(C-1)*FPF+i] := R(A+i), 1 <= i <= B
+	opcode{0, 0, OpArgU, OpArgU, IABC /* */, "SETLIST ", setList},       // R(A)[(C-1)*FPF+i] := R(A+i), 1 <= i <= B
 	opcode{0, 1, OpArgU, OpArgN, IABx /* */, "CLOSURE ", unimpliedfunc}, // R(A) := closure(KPROTO[Bx])
 	opcode{0, 1, OpArgU, OpArgN, IABC /* */, "VARARG  ", unimpliedfunc}, // R(A), R(A+1), ..., R(A+B-2) = vararg
 	opcode{0, 0, OpArgU, OpArgU, IAx /*  */, "EXTRAARG", unimpliedfunc}, // extra (larger) argument for previous opcode
